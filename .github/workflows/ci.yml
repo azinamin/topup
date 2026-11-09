@@ -1,0 +1,43 @@
+name: UI tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      marker:
+        description: "عبارت pytest -m (مثلاً mocked یا e2e)"
+        default: "topup"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BASE_URL: ${{ secrets.BASE_URL }}
+      DIGIPAY_MOBILE: ${{ secrets.DIGIPAY_MOBILE }}
+      TOPUP_MOBILE: ${{ secrets.TOPUP_MOBILE }}
+      ORDER_API_GLOB: ${{ secrets.ORDER_API_GLOB }}
+      AUTH_STATE_B64: ${{ secrets.AUTH_STATE_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: playwright install --with-deps chromium
+      - run: sudo apt-get install -y xvfb
+      - name: Restore saved login (OTP پیامکی در CI ممکن نیست)
+        if: env.AUTH_STATE_B64 != ''
+        run: |
+          mkdir -p .auth
+          echo "$AUTH_STATE_B64" | base64 -d > .auth/state.json
+      - name: Run tests (headed under xvfb)
+        run: xvfb-run -a --server-args="-screen 0 1440x900x24" pytest -m "${{ github.event.inputs.marker || 'topup' }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reports
+          path: reports/
+          retention-days: 14
