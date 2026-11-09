@@ -4,7 +4,6 @@ from pytest_bdd import given, parsers, then, when
 from utils import config, data
 
 
-# ---------- ساخت فرم ----------
 def _fill_until_amount(topup_page, sim):
     topup_page.type_mobile(data.mobile_for("valid"))
     topup_page.press_buy()
@@ -57,7 +56,6 @@ def press_continue(topup_page):
     topup_page.press_continue()
 
 
-# ---------- بررسی‌ها ----------
 @then(parsers.parse('the operator "{key}" should be selected'))
 def operator_selected(topup_page, key):
     topup_page.wait_operator_selected(data.operator_name(key))
@@ -95,8 +93,8 @@ def cannot_continue(topup_page, confirm_page):
     button = topup_page.continue_button
     assert button.count() > 0, "دکمه‌ی ادامه پیدا نشد؛ لوکیتور continue_button را اصلاح کن"
     if button.is_disabled():
-        return                                    # دکمه غیرفعال است: درست
-    button.click()                                # فعال بود: نباید به صفحه‌ی تأیید برود
+        return                                    
+    button.click()                                
     assert not confirm_page.is_open(timeout=3000), "مبلغ نامعتبر نباید به صفحه‌ی تأیید برسد"
 
 

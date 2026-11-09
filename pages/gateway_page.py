@@ -13,7 +13,6 @@ class GatewayPage:
 
     def __init__(self, page):
         self.page = page
-        # درگاه‌ها فرق دارند؛ دکمه، لینک یا input را با متن «انصراف» پیدا می‌کنیم
         self.cancel_button = page.locator(
             "button:has-text('انصراف'), a:has-text('انصراف'), input[value*='انصراف']"
         ).first

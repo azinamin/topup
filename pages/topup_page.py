@@ -2,7 +2,6 @@ import re
 
 from utils import config, data, helpers
 
-# رنگ حاشیه و پس‌زمینه‌ی کارتی که دور متن اپراتور است را برمی‌گرداند (کارت انتخاب‌شده ظاهر متفاوتی دارد)
 STYLE_JS = """el => {
   let n = el;
   for (let i = 0; i < 5 && n; i++) {
@@ -21,8 +20,6 @@ class TopupPage:
 
     def __init__(self, page):
         self.page = page
-        # --- لوکیتورها ---
-        # id فیلد شماره پویاست (dg-input-1234) پس از آن استفاده نمی‌کنیم
         self.mobile_field = page.locator("input[inputmode='numeric']").first
         self.buy_button = page.get_by_role("button", name="خرید شارژ").first
         self.amount_field = page.get_by_label("مبلغ دلخواه").or_(page.locator("input[id^='dg-amount-']")).first
@@ -32,24 +29,23 @@ class TopupPage:
         ).locator("visible=true")
         self.saw_error = False
 
-    # --- کارها ---
     def open(self):
         self.page.goto(f"{config.base_url()}/top-up", wait_until="domcontentloaded", timeout=90000)
         self.mobile_field.wait_for(state="visible", timeout=30000)
 
     def type_mobile(self, mobile):
         """اپ شماره‌ی لاگین را خودش در فیلد می‌گذارد؛ پس اول پاک می‌کنیم، تایپ می‌کنیم و چک می‌کنیم."""
-        self.page.wait_for_timeout(1000)                     # صبر تا اپ شماره‌ی پیش‌فرض را بگذارد
+        self.page.wait_for_timeout(1000)                     
         shown = ""
         for _ in range(3):
             self.mobile_field.click()
-            self.mobile_field.press("ControlOrMeta+A")       # انتخاب همه
-            self.mobile_field.press("Backspace")             # پاک کردن
+            self.mobile_field.press("ControlOrMeta+A")       
+            self.mobile_field.press("Backspace")             
             if mobile:
                 self.mobile_field.press_sequentially(mobile, delay=40)
             self.page.wait_for_timeout(400)
             shown = helpers.normalize_digits(self.mobile_field.input_value()).replace(" ", "")
-            if shown == mobile or not mobile.isdigit():      # حروف/خالی را نمی‌شود با عدد مقایسه کرد
+            if shown == mobile or not mobile.isdigit():      
                 return
         raise AssertionError(f"فیلد شماره '{shown}' را نگه داشت، نه '{mobile}'")
 

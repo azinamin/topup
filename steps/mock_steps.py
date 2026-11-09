@@ -17,7 +17,6 @@ def api_connection_fails(page, mock_state):
 
 @given(parsers.parse('the order API is slow and fails with status "{status}" after "{delay}" ms'))
 def api_slow(page, mock_state, status, delay):
-    # تیکت واقعی می‌ماند تا صفحه‌ی تأیید باز شود. کندی روی درخواست پرداخت است.
     mock_state["spy"] = mock_api(
         page, "**/top-ups/pay/**", status=int(status), delay_ms=int(delay), methods=("GET",)
     )
@@ -52,5 +51,5 @@ def not_on_bank(gateway_page):
 
 @then(parsers.parse("the order API should be called at most {n} time"))
 def call_count(page, mock_state, n):
-    page.wait_for_timeout(4000)   # صبر تا پاسخ دیرِ جعلی تمام شود
+    page.wait_for_timeout(4000)   
     assert mock_state["spy"].count <= int(n), f"API {mock_state['spy'].count} بار صدا زده شد (ثبت دوباره‌ی سفارش)"

@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / ".env")
 
-STATE_FILE = ROOT / ".auth" / "state.json"   # لاگین ذخیره‌شده (کوکی‌ها)
+STATE_FILE = ROOT / ".auth" / "state.json"   
 
 
 def _env(name, default=""):

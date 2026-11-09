@@ -6,12 +6,10 @@ from utils import config
 class LoginPage:
     def __init__(self, page):
         self.page = page
-        # --- لوکیتورها (آدرس المان‌ها) ---
         self.phone_field = page.locator("input[inputmode='numeric']").first
         self.continue_button = page.get_by_role("button", name="قبول شرایط و ادامه")
         self.otp_field = page.locator("input[autocomplete='one-time-code'], input[name*='otp' i]").first
 
-    # --- کارها ---
     def open(self):
         """اگر لاگین نباشی اپ به /auth/login می‌رود و اگر باشی به /hub."""
         self.page.goto(config.base_url(), wait_until="domcontentloaded", timeout=90000)

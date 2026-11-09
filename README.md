@@ -23,8 +23,8 @@ Python 3.10+, and a Digipay account (an SMS verification code is sent). For Dock
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-playwright install chromium     # if the download is blocked: set BROWSER_CHANNEL=chrome in .env
-cp .env.example .env            # then fill in the values (.env is never committed)
+playwright install chromium      
+cp .env.example .env            
 ```
 
 ## Environment variables (.env)
@@ -41,12 +41,12 @@ cp .env.example .env            # then fill in the values (.env is never committ
 
 ## Local run (headed)
 ```bash
-python -m utils.save_login      # once: the number is entered, you type the SMS code in the browser, the login is saved
-pytest                          # all tests
-pytest -m e2e                   # the main scenario only
-pytest -m "real and not e2e"    # the other real tests
-pytest -m mocked                # the mock tests
-pytest -k "below_min"           # one case
+python -m utils.save_login      
+pytest                          
+pytest -m e2e                   
+pytest -m "real and not e2e"    
+pytest -m mocked                
+pytest -k "below_min"           
 ```
 SMS OTP cannot be automated, so login is done once and saved in `.auth/state.json`, and each test builds a fresh context from it.
 Asking for OTP too often makes the server return 429.

@@ -19,7 +19,7 @@ def mock_api(page, url_glob, status=500, delay_ms=0, abort=False, methods=("POST
 
     def handler(route, request):
         if request.method not in methods:
-            return route.fallback()            # بقیه‌ی درخواست‌ها دست‌نخورده می‌مانند
+            return route.fallback()            
         spy.urls.append(request.url)
         if delay_ms:
             time.sleep(delay_ms / 1000)        # پاسخ را عمداً دیر بده

@@ -11,7 +11,6 @@ from pages.receipt_page import ReceiptPage
 from pages.topup_page import TopupPage
 from utils import config
 
-# فایل‌های step که باید ثبت شوند
 pytest_plugins = [
     "steps.common_steps",
     "steps.form_steps",
@@ -20,7 +19,6 @@ pytest_plugins = [
 ]
 
 
-# ---------- مرورگر: اندازه‌ی پنجره و (اختیاری) استفاده از Chrome نصب‌شده ----------
 @pytest.fixture(scope="session")
 def browser_type_launch_args(browser_type_launch_args):
     args = {**browser_type_launch_args,
@@ -30,7 +28,6 @@ def browser_type_launch_args(browser_type_launch_args):
     return args
 
 
-# ---------- هر تست یک context تازه دارد (استقلال تست‌ها) ----------
 @pytest.fixture
 def browser_context_args(browser_context_args, request):
     args = {**browser_context_args, "locale": "fa-IR", "timezone_id": "Asia/Tehran",
@@ -48,7 +45,6 @@ def mock_state():
     return {}
 
 
-# ---------- Page Objectها ----------
 @pytest.fixture
 def login_page(page): return LoginPage(page)
 
@@ -76,7 +72,6 @@ def _auto_close_notification(notification_modal):
     notification_modal.auto_close()
 
 
-# ---------- اسکرین‌شات تست شکست‌خورده داخل گزارش HTML ----------
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     outcome = yield

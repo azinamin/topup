@@ -28,7 +28,6 @@ def mobile_with_prefix(prefix):
     return prefix + config.topup_mobile()[4:]
 
 
-# ---------- اپراتور ----------
 def operator_key_for(mobile):
     return _load()["operators"]["prefixes"].get(mobile[:4])
 
@@ -55,7 +54,6 @@ def sim_labels():
     return list(_load()["sim_types"].values())
 
 
-# ---------- مبلغ (تحلیل مقدار مرزی) ----------
 def amount_for(case):
     limits = _load()["amount_limits"]
     cases = {
