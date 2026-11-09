@@ -1,0 +1,7 @@
+.env
+.auth/
+reports/*
+!reports/.gitkeep
+__pycache__/
+.pytest_cache/
+.venv/
