@@ -1,24 +1,24 @@
-# PR: اتوماسیون خرید شارژ دیجی‌پی (Playwright + pytest-bdd + POM)
+# PR: Digipay top-up purchase automation (Playwright + pytest-bdd + POM)
 
-## چه چیزی اضافه شد
-- سناریوی اجباری E2E: لاگین ← خرید شارژ ← تأیید ← درگاه ← انصراف ← رسید ناموفق.
-- ۱۱ تست‌کیس طراحی‌شده (۲۴ مورد اجرایی): مثبت، منفی، مرزی و خطای API با mock.
-- BDD (Given/When/Then) + Page Object Model، داده‌ی تست جدا، هر تست مستقل.
-- Dockerfile و workflow برای GitHub Actions (اجرای headed با xvfb، انتشار گزارش، اسکرین‌شات و trace).
-- مستندات: README، docs/TEST_DESIGN.md، docs/DESIGN_NOTES.md.
+## What was added
+- Mandatory E2E scenario: login → buy top-up → confirm → gateway → cancel → failed receipt.
+- 11 designed test cases (24 executable cases): positive, negative, boundary, and API errors with mocks.
+- BDD (Given/When/Then) + Page Object Model, test data kept separate, each test independent.
+- Dockerfile and a GitHub Actions workflow (headed run under xvfb; the report, screenshots, and traces are published).
+- Docs: README, docs/TEST_DESIGN.md, docs/DESIGN_NOTES.md.
 
-## نحوه‌ی بررسی
+## How to review
 ```bash
-cp .env.example .env          # مقدارها را پر کن
-python -m utils.save_login    # یک بار: لاگین و ذخیره‌ی نشست
-pytest -m e2e                 # سناریوی اصلی، Chromium headed
+cp .env.example .env          # fill in the values
+python -m utils.save_login    # once: log in and save the session
+pytest -m e2e                 # main scenario, Chromium headed
 ```
 
-## اسکرین‌شات
-_اضافه کن: (۱) ترمینال با اجرای موفق، (۲) reports/index.html، (۳) مرورگر روی رسید ناموفق._
+## Screenshots
+_Add: (1) the terminal showing a successful run, (2) reports/index.html, (3) the browser on the failed receipt._
 
-## چک‌لیست
-- [x] Chromium headed و slowmo
-- [x] شماره، OTP، توکن و آدرس فقط از env؛ `.env` در gitignore
-- [x] تست‌های واقعی و mock در README مشخص شده‌اند
-- [x] branch فیچر و کامیت‌های اتمیک
+## Checklist
+- [x] Chromium headed, with slowmo
+- [x] Phone number, OTP, token, and URL come only from env; `.env` is gitignored
+- [x] Real tests and mock tests are called out in the README
+- [x] Feature branch and atomic commits

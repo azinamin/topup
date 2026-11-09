@@ -63,7 +63,7 @@ def browser_channel():
 
 
 def order_api_glob():
-    return _env("ORDER_API_GLOB", "**/topup/**")
+    return _env("ORDER_API_GLOB", "**/app-pay/ticket")
 
 
 def return_url_regex():

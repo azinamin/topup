@@ -1,5 +1,6 @@
 """شبیه‌سازی پاسخ API با page.route: درخواست به سرور واقعی نمی‌رسد، پس تراکنش واقعی ساخته نمی‌شود."""
 import json
+import time
 
 
 class Spy:
@@ -13,18 +14,18 @@ class Spy:
         return len(self.urls)
 
 
-def mock_api(page, url_glob, status=500, delay_ms=0, abort=False):
+def mock_api(page, url_glob, status=500, delay_ms=0, abort=False, methods=("POST", "PUT")):
     spy = Spy()
 
     def handler(route, request):
-        if request.method not in ("POST", "PUT"):
-            return route.fallback()            # درخواست‌های خواندنی دست‌نخورده می‌مانند
+        if request.method not in methods:
+            return route.fallback()            # بقیه‌ی درخواست‌ها دست‌نخورده می‌مانند
         spy.urls.append(request.url)
         if delay_ms:
-            page.wait_for_timeout(delay_ms)    # پاسخ را عمداً دیر بده
+            time.sleep(delay_ms / 1000)        # پاسخ را عمداً دیر بده
         if abort:
             return route.abort("failed")       # قطع شبکه
-        body = json.dumps({"message": "mocked error", "status": status})
+        body = json.dumps({"message": "خطا در انجام عملیات", "status": status})
         route.fulfill(status=status, content_type="application/json", body=body)
 
     page.route(url_glob, handler)

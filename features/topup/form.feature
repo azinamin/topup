@@ -11,7 +11,7 @@ Feature: فرم خرید شارژ - شماره، اپراتور و نوع سیم
 
     Examples:
       | prefix | operator |
-      | 0912   | mci      |
+      | 0919   | mci      |
       | 0935   | mtn      |
       | 0921   | rightel  |
 

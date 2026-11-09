@@ -1,82 +1,82 @@
-# تست خودکار خرید شارژ دیجی‌پی
+# Digipay top-up automation
 
-Playwright (Python) + pytest-bdd (Given/When/Then) + Page Object Model، روی Chromium در حالت **headed**.
+Playwright (Python) + pytest-bdd (Given/When/Then) + Page Object Model, on Chromium in **headed** mode.
 
-## هر لایه چه کاری می‌کند
+## What each layer does
 ```
-features/   ← سناریوها به زبان ساده (Given/When/Then): چه چیزی تست می‌شود
-steps/      ← هر جمله‌ی فیچر یک تابع کوتاه است که متد صفحه را صدا می‌زند
-pages/      ← اینجا لوکیتورها و کلیک/تایپ هستند (Page Object Model)
-components/ ← بخش‌های تکراری UI (مودال اعلان)
-test_data/  ← داده‌ی تست (اپراتورها، انواع سیم‌کارت، حد مبلغ). شماره موبایل در آن نیست
-utils/      ← تنظیمات (.env)، داده، توابع کمکی، mock، ذخیره‌ی لاگین
-tests/      ← هر فایل یک خط است: scenarios("topup/<فایل>.feature")
-conftest.py ← فیکسچرها: مرورگر، context تازه برای هر تست، Page Objectها
-docs/       ← TEST_DESIGN.md و DESIGN_NOTES.md
+features/   ← scenarios in plain language (Given/When/Then): what is tested
+steps/      ← each feature sentence is a short function that calls a page method
+pages/      ← locators, clicks, and typing live here (Page Object Model)
+components/ ← shared UI pieces (the notification modal)
+test_data/  ← test data (operators, SIM types, amount limits). Mobile numbers are absent
+utils/      ← settings (.env), data, helpers, mocks, saved login
+tests/      ← each file is one line: scenarios("topup/<file>.feature")
+conftest.py ← fixtures: browser, a fresh context per test, Page Objects
+docs/       ← TEST_DESIGN.md and DESIGN_NOTES.md
 ```
-مسیر یک جمله: `features/topup/e2e.feature` ← `steps/form_steps.py` ← `pages/topup_page.py` (لوکیتور + کلیک).
+Path of one sentence: `features/topup/e2e.feature` ← `steps/form_steps.py` ← `pages/topup_page.py` (locator + click).
 
-## پیش‌نیازها
-Python 3.10+، یک حساب دیجی‌پی (کد تأیید پیامکی می‌آید). برای Docker/CI: Docker یا GitHub Actions.
+## Prerequisites
+Python 3.10+, and a Digipay account (an SMS verification code is sent). For Docker/CI: Docker or GitHub Actions.
 
-## نصب
+## Setup
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-playwright install chromium     # اگر دانلود بلاک بود: BROWSER_CHANNEL=chrome را در .env بگذار
-cp .env.example .env            # و مقدارها را پر کن (.env هرگز commit نمی‌شود)
+playwright install chromium     # if the download is blocked: set BROWSER_CHANNEL=chrome in .env
+cp .env.example .env            # then fill in the values (.env is never committed)
 ```
 
-## متغیرهای محیطی (.env)
-| متغیر | الزامی | معنی |
+## Environment variables (.env)
+| Variable | Required | Meaning |
 |---|---|---|
-| `BASE_URL` | بله | مثلاً `https://app.mydigipay.com` |
-| `DIGIPAY_MOBILE` | بله | شماره‌ی لاگین |
-| `TOPUP_MOBILE` | نه | شماره‌ی دریافت‌کننده‌ی شارژ (پیش‌فرض: همان شماره‌ی لاگین) |
-| `DIGIPAY_OTP` | نه | OTP ثابت برای حساب تستی. خالی = کد پیامکی را خودت در مرورگر می‌زنی |
-| `DIGIPAY_TOKEN`, `DIGIPAY_TOKEN_KEY` | نه | توکن که قبل از لاگین در localStorage گذاشته می‌شود |
-| `BROWSER_CHANNEL` | نه | `chrome` = استفاده از Google Chrome نصب‌شده به‌جای Chromium دانلودی (فقط لوکال) |
-| `ORDER_API_GLOB` | برای `@mocked` | الگوی URL درخواست ساخت سفارش (DevTools > Network) |
-| `RETURN_URL_REGEX` | نه | الگوی آدرس بعد از برگشت از بانک (پیش‌فرض `mydigipay`) |
+| `BASE_URL` | yes | for example `https://app.mydigipay.com` |
+| `DIGIPAY_MOBILE` | yes | login phone number |
+| `TOPUP_MOBILE` | no | phone number that receives the top-up (default: the login number) |
+| `DIGIPAY_OTP` | no | fixed OTP for a test account. Empty = you type the SMS code in the browser |
+| `DIGIPAY_TOKEN`, `DIGIPAY_TOKEN_KEY` | no | token written to localStorage before login |
+| `BROWSER_CHANNEL` | no | `chrome` = use the installed Google Chrome in place of the downloaded Chromium (local only) |
+| `ORDER_API_GLOB` | for `@mocked` | URL pattern of the create-order request (DevTools > Network) |
+| `RETURN_URL_REGEX` | no | URL pattern after returning from the bank (default `mydigipay`) |
 
-## اجرای لوکال (headed)
+## Local run (headed)
 ```bash
-python -m utils.save_login      # یک بار: شماره وارد می‌شود، کد پیامکی را در مرورگر بزن، لاگین ذخیره می‌شود
-pytest                          # همه‌ی تست‌ها
-pytest -m e2e                   # فقط سناریوی اصلی
-pytest -m "real and not e2e"    # تست‌های واقعی دیگر
-pytest -m mocked                # تست‌های mock
-pytest -k "below_min"           # یک مورد
+python -m utils.save_login      # once: the number is entered, you type the SMS code in the browser, the login is saved
+pytest                          # all tests
+pytest -m e2e                   # the main scenario only
+pytest -m "real and not e2e"    # the other real tests
+pytest -m mocked                # the mock tests
+pytest -k "below_min"           # one case
 ```
-OTP پیامکی را نمی‌شود خودکار کرد؛ برای همین لاگین یک بار انجام و در `.auth/state.json` ذخیره می‌شود و هر تست یک context تازه از آن می‌سازد.
-اگر زیاد OTP بخواهی، سرور خطای 429 می‌دهد.
+SMS OTP cannot be automated, so login is done once and saved in `.auth/state.json`, and each test builds a fresh context from it.
+Asking for OTP too often makes the server return 429.
 
-## اجرا با Docker
+## Run with Docker
 ```bash
 docker build -t digipay-tests .
 docker run --rm --env-file .env -v "$PWD/.auth:/app/.auth" -v "$PWD/reports:/app/reports" digipay-tests
 ```
-مرورگر headed داخل `xvfb-run` اجرا می‌شود.
+The headed browser runs inside `xvfb-run`.
 
-## اجرا در CI (GitHub Actions)
-فایل `.github/workflows/ci.yml` روی push/PR و به‌صورت دستی اجرا می‌شود. secretها: `BASE_URL`, `DIGIPAY_MOBILE`, `TOPUP_MOBILE`,
-`ORDER_API_GLOB` و برای لاگین `AUTH_STATE_B64` (خروجی `base64 -i .auth/state.json`). اجرا headed با `xvfb-run` است و پوشه‌ی `reports/`
-(گزارش HTML، اسکرین‌شات، trace) به‌عنوان artifact منتشر می‌شود.
+## Run in CI (GitHub Actions)
+`.github/workflows/ci.yml` runs on push, on pull request, and manually. Secrets: `BASE_URL`, `DIGIPAY_MOBILE`, `TOPUP_MOBILE`,
+`ORDER_API_GLOB`, and for login `AUTH_STATE_B64` (the output of `base64 -i .auth/state.json`). The run is headed under `xvfb-run`, and the `reports/` folder
+(HTML report, screenshots, traces) is published as an artifact.
 
-## گزارش‌ها
-- `reports/index.html`: گزارش HTML تک‌فایله (اسکرین‌شات تست شکست‌خورده داخلش است)
-- `reports/artifacts/`: اسکرین‌شات و trace تست‌های شکست‌خورده. باز کردن trace: `playwright show-trace reports/artifacts/<پوشه>/trace.zip`
+## Reports
+- `reports/index.html`: a single-file HTML report (the failed-test screenshot is embedded)
+- `reports/artifacts/`: screenshots and traces of failed tests. Open a trace with `playwright show-trace reports/artifacts/<folder>/trace.zip`
 
-## تست‌های واقعی و mock
-| تست | حالت | توضیح |
+## Real tests and mock tests
+| Test | Mode | Notes |
 |---|---|---|
-| E2E سناریوی اصلی | **واقعی** | در دکمه‌ی انصراف بانک متوقف می‌شود؛ پولی جابه‌جا نمی‌شود |
-| TC-01 تا TC-08 | **واقعی** | هیچ‌کدام پرداخت نمی‌کنند |
-| TC-09 خطای ۴۰۰/۵۰۰/۵۰۳، TC-10 قطع شبکه، TC-11 دابل‌کلیک | **mock** با `page.route` | درخواست ساخت سفارش به سرور نمی‌رسد |
+| E2E, the main scenario | **real** | Stops at the bank cancel button; no money moves |
+| TC-01 through TC-08 | **real** | None of them pay |
+| TC-09 errors 400/500/503, TC-10 network drop, TC-11 double-click | **mock** via `page.route` | The create-order request never reaches the server |
 
-## تفاوت با ساختار پیشنهادی
-پوشه‌ی `features/` اضافه شد (فایل‌های Gherkin کد پایتون نیستند). `components/` فقط یک جزء مشترک دارد. اسکریپت ذخیره‌ی لاگین در `utils/save_login.py` است.
+## Difference from the suggested layout
+The `features/` folder was added because Gherkin files sit outside the Python code. `components/` holds a single shared piece. The login-save script is `utils/save_login.py`.
 
-## قبل از اولین اجرای کامل
-سایت واقعی را ندیده‌ام که برای همه‌ی صفحات لوکیتور حدسی نباشد. لوکیتورهای ورود، `/top-up`، باتم‌شیت سیم‌کارت و فیلد مبلغ از DOM واقعی گرفته شده‌اند.
-لوکیتورهای بعد از مبلغ (دکمه‌ی ادامه، صفحه‌ی تأیید، دکمه‌ی پرداخت، دکمه‌ی انصراف بانک، رسید)، حد واقعی مبلغ در `test_data/topup_data.json` و `ORDER_API_GLOB` باید با سایت تطبیق داده شوند.
+## Before the first full run
+The live site has not been seen well enough for every page's locator to be free of guesswork. Locators for login, `/top-up`, the SIM bottom sheet, and the amount field come from the real DOM.
+Locators after the amount (the continue button, the confirmation page, the pay button, the bank cancel button, the receipt), the real amount limits in `test_data/topup_data.json`, and `ORDER_API_GLOB` still need to be aligned with the site.

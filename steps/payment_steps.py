@@ -31,7 +31,7 @@ def back_in_digipay(receipt_page, page):
 @then(parsers.parse('I should see the failed receipt with the "{case}" amount and a tracking code'))
 def failed_receipt(receipt_page, case):
     receipt_page.expect_failed()
-    assert receipt_page.shows_amount(data.amount_for(case)), "مبلغ رسید با مبلغ انتخابی فرق دارد"
+    assert receipt_page.shows_amount(data.shown_amount(case)), "مبلغ رسید با مبلغ انتخابی فرق دارد"
     code = receipt_page.tracking_code()
     assert code, "کد رهگیری در رسید نیست"
     print(f"\nکد رهگیری رسید ناموفق: {code}")

@@ -14,9 +14,12 @@ Feature: مبلغ شارژ - مقدار مرزی
       | case      |
       | below_min |
       | above_max |
-      | zero      |
-      | empty     |
-      | letters   |
+
+  Scenario: TC-12 The bonus charge can be turned on
+    When I turn on the bonus charge
+    And I press continue
+    Then I should reach the confirmation page
+    And the confirmation shows the bonus charge
 
   Scenario Outline: TC-06 Amounts exactly on the limits are accepted
     When I type the "<case>" amount

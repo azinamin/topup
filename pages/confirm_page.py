@@ -32,6 +32,9 @@ class ConfirmPage:
     def shows_text(self, text):
         return self.page.get_by_text(text).first.is_visible()
 
+    def shows_bonus_charge(self):
+        return self.page.get_by_text("شورانگیز").locator("visible=true").count() > 0
+
     def choose_gateway_and_pay(self):
         self.gateway_option.click()
         self.pay_button.click()

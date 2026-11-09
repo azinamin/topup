@@ -10,7 +10,7 @@ class ReceiptPage:
 
     def __init__(self, page):
         self.page = page
-        self.failed_text = page.get_by_text("عملیات ناموفق").first
+        self.failed_text = page.get_by_text(re.compile(r"ناموفق")).first
         self.tracking_label = page.get_by_text(re.compile("کد رهگیری")).first
 
     def wait_until_back(self):

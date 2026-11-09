@@ -19,7 +19,7 @@ def filled_until_amount(topup_page):
 @given("a valid top-up form")
 def valid_form(topup_page):
     _fill_until_amount(topup_page, "credit")
-    topup_page.type_amount(data.amount_for("default"))
+    topup_page.type_amount(data.shown_amount("default"))
 
 
 @when(parsers.parse('I type the "{case}" mobile number'))
@@ -44,7 +44,12 @@ def choose_sim(topup_page, sim):
 
 @when(parsers.parse('I type the "{case}" amount'))
 def type_amount(topup_page, case):
-    topup_page.type_amount(data.amount_for(case))
+    topup_page.type_amount(data.shown_amount(case))
+
+
+@when("I turn on the bonus charge")
+def turn_on_bonus_charge(topup_page):
+    topup_page.turn_on_bonus_charge()
 
 
 @when("I press continue")
@@ -103,5 +108,10 @@ def reach_confirmation(confirm_page):
 @then(parsers.parse('the confirmation shows my mobile, the "{case}" amount and the "{sim}" sim type'))
 def confirmation_details(confirm_page, case, sim):
     assert confirm_page.shows_mobile(config.topup_mobile()), "شماره‌ی موبایل در صفحه‌ی تأیید نیست"
-    assert confirm_page.shows_amount(data.amount_for(case)), "مبلغ در صفحه‌ی تأیید نیست یا اشتباه است"
-    assert confirm_page.shows_text(data.sim_label(sim)), "نوع سیم‌کارت در صفحه‌ی تأیید نیست"
+    assert confirm_page.shows_amount(data.shown_amount(case)), "مبلغ در صفحه‌ی تأیید نیست یا اشتباه است"
+    assert confirm_page.shows_text(data.sim_confirm_label(sim)), "نوع سیم‌کارت در صفحه‌ی تأیید نیست"
+
+
+@then("the confirmation shows the bonus charge")
+def confirmation_bonus(confirm_page):
+    assert confirm_page.shows_bonus_charge(), "شارژ شورانگیز در صفحه‌ی تأیید نیست"

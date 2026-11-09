@@ -27,9 +27,10 @@ class TopupPage:
         self.buy_button = page.get_by_role("button", name="خرید شارژ").first
         self.amount_field = page.get_by_label("مبلغ دلخواه").or_(page.locator("input[id^='dg-amount-']")).first
         self.continue_button = page.get_by_role("button", name=re.compile("ادامه|تایید|تأیید")).first
-        self.error_message = page.get_by_role("alert").or_(
-            page.get_by_text(re.compile("نامعتبر|خطا|حداقل|حداکثر|مجاز نیست"))
-        ).first
+        self.error_message = page.get_by_text(
+            re.compile("خطا|در دسترس نیست|سعی کنید|تلاش کنید")
+        ).locator("visible=true")
+        self.saw_error = False
 
     # --- کارها ---
     def open(self):
@@ -73,6 +74,16 @@ class TopupPage:
     def sim_is_visible(self, label):
         return self.page.get_by_text(label, exact=True).first.is_visible()
 
+    def turn_on_bonus_charge(self):
+        """سوئیچ «شارژ شورانگیز»؛ ۳۵٪ شارژ بیشتر. پیش‌فرض خاموش است."""
+        heading = self.page.get_by_role("heading", name="شارژ شورانگیز")
+        heading.wait_for(state="visible", timeout=10000)
+        card = heading.locator("xpath=ancestor::div[.//input[@type='checkbox']][1]")
+        checkbox = card.locator("input[type=checkbox]")
+        card.locator("label").click()
+        if not checkbox.is_checked():
+            raise AssertionError("شارژ شورانگیز روشن نشد")
+
     def type_amount(self, amount):
         """فیلد هنگام تایپ جداکننده‌ی هزارگان اضافه می‌کند؛ پس هر رقم را جدا می‌زنیم و نشانگر را به آخر می‌بریم."""
         self.amount_field.wait_for(state="visible", timeout=10000)
@@ -88,7 +99,8 @@ class TopupPage:
 
     def error_is_shown(self, timeout=8000):
         try:
-            self.error_message.wait_for(state="visible", timeout=timeout)
+            self.error_message.first.wait_for(state="visible", timeout=timeout)
+            self.saw_error = True
             return True
         except Exception:
-            return False
+            return self.saw_error

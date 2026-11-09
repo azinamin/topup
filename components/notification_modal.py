@@ -1,4 +1,3 @@
-"""مودال «فعال‌سازی اعلان‌ها» که بعد از لاگین روی صفحه می‌آید و جلوی کلیک‌ها را می‌گیرد."""
 import re
 
 from playwright.sync_api import TimeoutError as PWTimeout

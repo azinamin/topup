@@ -1,8 +1,9 @@
 {
   "operators": {
-    "prefixes": { "0912": "mci", "0935": "mtn", "0921": "rightel" },
+    "prefixes": { "0919": "mci", "0935": "mtn", "0921": "rightel" },
     "names": { "mci": "همراه اول", "mtn": "ایرانسل", "rightel": "رایتل", "shatel": "شاتل\u200cموبایل" }
   },
   "sim_types": { "permanent": "دائمی", "credit": "اعتباری", "data": "دیتا" },
-  "amount_limits": { "min": 10000, "max": 500000, "default": 10000 }
+  "sim_confirm_labels": { "credit": "مستقیم", "permanent": "مستقیم" },
+  "amount_limits": { "min": 220000, "max": 1000000, "default": 250000 }
 }

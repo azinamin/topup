@@ -1,34 +1,34 @@
-# طراحی تست
+# Test design
 
-هر تست مستقل است: context مرورگر تازه می‌گیرد (فقط کوکی‌های لاگین به‌صورت فقط‌خواندنی مشترک است)، داده‌ی خودش را از
-`test_data/topup_data.json` می‌خواند و به نتیجه‌ی تست دیگری وابسته نیست. شماره موبایل‌ها در فایل داده نیستند و از `.env` ساخته می‌شوند.
+Each test is independent. It gets a fresh browser context (only the login cookies are shared, and they are read-only), reads its own data from `test_data/topup_data.json`, and does not depend on another test's result. Mobile numbers are absent from the data file; they are built from `.env`.
 
-**R** = روی پاسخ واقعی سرور | **M** = پاسخ API با `page.route` جعل می‌شود (تراکنش واقعی ساخته نمی‌شود)
+**R** = against the real server response | **M** = the API response is faked with `page.route` (no real transaction is created)
 
-## سناریوی اجباری
+## Mandatory scenario
 
-| شناسه | سناریو | نوع | هدف | تکنیک | نتیجه‌ی مورد انتظار | دلیل انتخاب |
+| ID | Scenario | Type | Goal | Technique | Expected result | Why it was chosen |
 |---|---|---|---|---|---|---|
-| E2E | ورود ← خرید شارژ ← شماره/اپراتور ← سیم‌کارت و مبلغ ← تأیید ← درگاه اینترنتی ← **انصراف در بانک** ← برگشت به اپ ← رسید ناموفق | R | کل مسیر پول تا پایان امن | End-to-end / گذار حالت | صفحه‌ی بانک روی دامنه‌ی دیگر؛ بعد از انصراف برگشت به mydigipay؛ رسید «عملیات ناموفق» با مبلغ و کد رهگیری | الزام تسک؛ انصراف در بانک تنها راه رسیدن به درگاه بدون جابه‌جایی پول واقعی است |
+| E2E | Login → buy top-up → number/operator → SIM type and amount → confirm → internet gateway → **cancel at the bank** → return to the app → failed receipt | R | The full money path through a safe ending | End-to-end / state transition | The bank page is on another domain; after cancel, the app returns to mydigipay; the receipt shows «عملیات ناموفق» ("operation failed") with the amount and tracking code | Required by the task; cancelling at the bank is the only way to reach the gateway without moving real money |
 
-## ۱۱ تست‌کیس طراحی‌شده (۲۴ مورد اجرایی)
+## 12 designed test cases (22 executable cases)
 
-| شناسه | عنوان / نمونه‌ها | نوع | هدف | تکنیک | نتیجه‌ی مورد انتظار | چرا |
+| ID | Title / examples | Type | Goal | Technique | Expected result | Why |
 |---|---|---|---|---|---|---|
-| TC-01 | تشخیص اپراتور: `0912`، `0935`، `0921` | R | اپراتور از روی پیش‌شماره انتخاب شود | افراز هم‌ارزی (یک نماینده از هر اپراتور) | کارت اپراتور درست انتخاب می‌شود | اپراتور اشتباه یعنی شارژ برای شبکه‌ی اشتباه؛ هر اپراتور یک افراز است |
-| TC-02 | شماره‌ی نامعتبر: `short` (۱۰ رقم)، `bad_prefix` (08...)، `letters`، `empty` | R | شماره‌ی خراب مسیر را نبندد | افراز هم‌ارزی کلاس‌های نامعتبر + مقدار مرزی طول | دکمه‌ی «خرید شارژ» غیرفعال می‌ماند | اولین فیلد فرم است و اعتبارسنجی‌اش از بقیه‌ی مراحل محافظت می‌کند |
-| TC-03 | شماره‌ی معتبر | R | حالت مثبت TC-02 | افراز هم‌ارزی (کلاس معتبر) | دکمه‌ی «خرید شارژ» فعال می‌شود | بدون حالت مثبت، TC-02 می‌تواند به‌خاطر دکمه‌ای که همیشه غیرفعال است پاس شود |
-| TC-04 | باتم‌شیت سیم‌کارت | R | سه نوع سیم‌کارت نمایش داده شود | بررسی محتوای UI | «دائمی»، «اعتباری»، «دیتا» دیده می‌شوند | نوع سیم‌کارت روی محصول خریداری‌شده اثر دارد |
-| TC-05 | مبلغ نامعتبر: `below_min`، `above_max`، `zero`، `empty`، `letters` | R | مبلغ بیرون از بازه رد شود | تحلیل مقدار مرزی (یکی کمتر/بیشتر از حد) + حدس خطا | ادامه غیرفعال است یا به صفحه‌ی تأیید نمی‌رود | خطای یکی‌کم/یکی‌زیاد دقیقاً کنار حدها رخ می‌دهد |
-| TC-06 | مبلغ روی حد: `min`، `max` | R | خود حدها معتبرند | تحلیل مقدار مرزی (روی حد) | صفحه‌ی تأیید باز می‌شود | جفتِ TC-05 تا هر دو طرف هر مرز پوشش داده شود |
-| TC-07 | تأیید برای سیم‌کارت `credit`، `permanent` | R | صفحه‌ی تأیید همان چیزی را نشان دهد که انتخاب شد | جدول تصمیم (نوع سیم‌کارت ← برچسب نمایش‌داده‌شده) | شماره، مبلغ و نوع سیم‌کارت درست نمایش داده می‌شوند | کاربر قبل از رفتن به بانک باید همین را تأیید کند |
-| TC-08 | کاربر بدون لاگین | R | کنترل دسترسی | تست منفی / امنیتی | صفحه‌ی ورود نمایش داده می‌شود | اپ نباید بدون نشست، فلو را باز کند |
-| TC-09 | خطای API سفارش: `400`، `500`، `503` | M | خطای سرور مدیریت شود | افراز هم‌ارزی کلاس‌های خطای HTTP | پیام خطا؛ رفتن به بانک رخ نمی‌دهد | خطای سرور را نمی‌شود روی سرور واقعی ساخت؛ mock تراکنش واقعی هم نمی‌سازد |
-| TC-10 | قطع شبکه روی API سفارش | M | قطعی اینترنت مدیریت شود | تزریق خطا (`route.abort`) | پیام خطا؛ رفتن به بانک رخ نمی‌دهد | حالت خرابِ متفاوت از خطای HTTP: اصلاً پاسخی نیست |
-| TC-11 | دابل‌کلیک روی پرداخت | M | سفارش دوبار ثبت نشود | حدس خطا / همروندی (پاسخ دیرِ جعلی + شمارش درخواست) | API حداکثر یک بار صدا زده می‌شود | ثبت دوباره‌ی سفارش گران‌ترین باگ در فلوی پرداخت است |
+| TC-01 | Operator detection: `0919`, `0935`, `0921` | R | The operator is selected from the prefix | Equivalence partitioning (one representative per operator) | The correct operator card is selected | A wrong operator means top-up for the wrong network; each operator is one partition |
+| TC-02 | Invalid number: `short` (10 digits), `bad_prefix` (08...), `letters`, `empty` | R | A bad number does not open the flow | Equivalence partitioning of invalid classes + length boundary | The «خرید شارژ» ("buy top-up") button stays disabled | It is the first form field, and its validation protects the later steps |
+| TC-03 | Valid number | R | The positive case for TC-02 | Equivalence partitioning (valid class) | The «خرید شارژ» button becomes enabled | Without the positive case, TC-02 can pass on a button that is always disabled |
+| TC-04 | SIM bottom sheet | R | The three SIM types are shown | UI content check | «دائمی» (postpaid), «اعتباری» (prepaid), and «دیتا» (data) are visible | SIM type changes the product that is purchased |
+| TC-05 | Invalid amount: `below_min`, `above_max` | R | An amount outside the range is rejected | Boundary value analysis (one below and one above the limit) | Continue stays disabled, or the confirmation page is never reached | Off-by-one errors happen right next to the limits. The custom field rejects `0` and letters, so those are not separate cases |
+| TC-12 | Bonus charge («شارژ شورانگیز») | R | The 35% bonus can be switched on | State transition | The switch turns on, and the confirmation page shows the bonus | The amount sheet offers this option beside the preset amounts |
+| TC-06 | Amount on the limit: `min`, `max` | R | The limits themselves are valid | Boundary value analysis (on the boundary) | The confirmation page opens | The pair of TC-05, so both sides of each boundary are covered |
+| TC-07 | Confirmation for SIM types `credit` and `permanent` | R | The confirmation page shows what was selected | Decision table (SIM type → displayed label) | Number and amount are shown, and both SIM types display «مستقیم» | The user confirms this before going to the bank |
+| TC-08 | User without a login | R | Access control | Negative / security test | The login page is shown | The app must keep the flow closed without a session |
+| TC-09 | Order API error: `400`, `500`, `503` | M | A server error is handled | Equivalence partitioning of HTTP error classes | An error message is shown, and the app never goes to the bank | A server error cannot be forced on the real server, and the mock creates no real transaction |
+| TC-10 | Network drop on the order API | M | A lost connection is handled | Fault injection (`route.abort`) | An error message is shown, and the app never goes to the bank | A different failure from an HTTP error: there is no response at all |
+| TC-11 | Double-click on pay | M | The order is submitted once | Error guessing / concurrency (a fake delayed response plus a request count) | The API is called at most once | A duplicate order is the most expensive bug in the payment flow |
 
-## چک‌لیست استقلال
-- هر تست context تازه می‌گیرد؛ فقط `storage_state` فقط‌خواندنی مشترک است.
-- هر تست از `Given` خودش شروع می‌کند و به نتیجه‌ی تست دیگر وابسته نیست.
-- mockها روی `page` همان تست ثبت می‌شوند و بقیه را تحت تأثیر قرار نمی‌دهند.
-- اثبات: هر تست را جدا با `pytest -k "<نام>"` اجرا کن، یا با `pip install pytest-randomly` ترتیب را تصادفی کن.
+## Independence checklist
+- Each test gets a fresh context; only `storage_state` is shared, and it is read-only.
+- Each test starts from its own `Given` and does not depend on another test's result.
+- Mocks are registered on that test's `page` and leave the other tests untouched.
+- Proof: run each test alone with `pytest -k "<name>"`, or randomize the order with `pip install pytest-randomly`.

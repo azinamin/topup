@@ -17,12 +17,17 @@ def api_connection_fails(page, mock_state):
 
 @given(parsers.parse('the order API is slow and fails with status "{status}" after "{delay}" ms'))
 def api_slow(page, mock_state, status, delay):
-    mock_state["spy"] = mock_api(page, config.order_api_glob(), status=int(status), delay_ms=int(delay))
+    # تیکت واقعی می‌ماند تا صفحه‌ی تأیید باز شود. کندی روی درخواست پرداخت است.
+    mock_state["spy"] = mock_api(
+        page, "**/top-ups/pay/**", status=int(status), delay_ms=int(delay), methods=("GET",)
+    )
 
 
 @when("I submit the order")
 def submit_order(topup_page, confirm_page):
     topup_page.press_continue()
+    if topup_page.error_is_shown(timeout=4000):
+        return
     if confirm_page.is_open(timeout=5000):
         confirm_page.choose_gateway_and_pay()
 
@@ -37,7 +42,7 @@ def double_click_pay(topup_page, confirm_page):
 
 @then("I should see an error message")
 def see_error(topup_page):
-    assert topup_page.error_is_shown(), "پیام خطایی نمایش داده نشد"
+    assert topup_page.saw_error or topup_page.error_is_shown(timeout=3000), "پیام خطایی نمایش داده نشد"
 
 
 @then("I should not be on the bank page")

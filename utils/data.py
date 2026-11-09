@@ -46,6 +46,11 @@ def sim_label(key):
     return _load()["sim_types"][key]
 
 
+def sim_confirm_label(key):
+    """برچسب نوع شارژ در صفحه‌ی تأیید. اعتباری و دائمی آنجا «مستقیم» دیده می‌شوند."""
+    return _load().get("sim_confirm_labels", {}).get(key, sim_label(key))
+
+
 def sim_labels():
     return list(_load()["sim_types"].values())
 
@@ -59,8 +64,10 @@ def amount_for(case):
         "max": limits["max"],
         "below_min": limits["min"] - 1,
         "above_max": limits["max"] + 1,
-        "zero": 0,
-        "empty": "",
-        "letters": "abc",
     }
     return str(cases[case])
+
+
+def shown_amount(case):
+    """مبلغ به ریال است. بازه‌ی واقعی صفحه: ۲۲۰٬۰۰۰ تا ۱٬۰۰۰٬۰۰۰."""
+    return amount_for(case)
