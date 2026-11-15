@@ -1,6 +1,5 @@
 import pytest
 from pytest_bdd import given, parsers, then, when
-
 from utils import config, data
 
 
