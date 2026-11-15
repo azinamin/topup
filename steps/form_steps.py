@@ -50,9 +50,14 @@ def turn_on_bonus_charge(topup_page):
     topup_page.turn_on_bonus_charge()
 
 
-@when("I press continue")
+@when("I press continue") 
 def press_continue(topup_page):
     topup_page.press_continue()
+    
+    
+@when("I press myself button in form")
+def press_myself_button(topup_page):
+    topup_page.press_myself_button()
 
 
 @then(parsers.parse('the operator "{key}" should be selected'))
@@ -112,3 +117,11 @@ def confirmation_details(confirm_page, case, sim):
 @then("the confirmation shows the bonus charge")
 def confirmation_bonus(confirm_page):
     assert confirm_page.shows_bonus_charge(), "شارژ شورانگیز در صفحه‌ی تأیید نیست"
+    
+    
+
+
+@then("I should see mynumber in that field")
+def see_my_number(topup_page):
+    topup_page.expect_mobile_filled()
+

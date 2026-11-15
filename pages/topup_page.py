@@ -23,6 +23,7 @@ class TopupPage:
         self.mobile_field = page.locator("input[inputmode='numeric']").first
         self.buy_button = page.get_by_role("button", name="خرید شارژ").first
         self.amount_field = page.get_by_label("مبلغ دلخواه").or_(page.locator("input[id^='dg-amount-']")).first
+        self.myself_button = page.get_by_text("خودم", exact=True)
         self.continue_button = page.get_by_role("button", name=re.compile("ادامه|تایید|تأیید")).first
         self.error_message = page.get_by_text(
             re.compile("خطا|در دسترس نیست|سعی کنید|تلاش کنید")
@@ -100,3 +101,11 @@ class TopupPage:
             return True
         except Exception:
             return self.saw_error
+        
+        
+    def press_myself_button(self):
+        self.myself_button.click()
+        
+    def expect_mobile_filled(self):
+        from playwright.sync_api import expect
+        expect(self.mobile_field).not_to_be_empty()

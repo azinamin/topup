@@ -21,7 +21,7 @@ class LoginPage:
     def login(self, mobile, otp=""):
         self.open()
         if not self.is_login_page():
-            return                                     # از قبل لاگین بوده
+            return                                     
         self.phone_field.wait_for(state="visible", timeout=30000)
         self.phone_field.fill(mobile)
         self.continue_button.click()

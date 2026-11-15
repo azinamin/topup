@@ -34,3 +34,8 @@ Feature: فرم خرید شارژ - شماره، اپراتور و نوع سیم
     When I type the "valid" mobile number
     And I press the buy button
     Then I should see the sim types
+
+  
+  Scenario: TC-13 i want to charge mynumber
+    When I press myself button in form
+    Then I should see mynumber in that field
